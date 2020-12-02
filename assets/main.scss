@@ -1,0 +1,12 @@
+---
+---
+
+@import "minima";
+
+h2 {
+    padding-top: $spacing-unit * 2;
+}
+
+h2:first-child {
+    padding-top: initial;
+}

@@ -10,3 +10,7 @@ h2 {
 h2:first-child {
     padding-top: initial;
 }
+
+img.headshot {
+    max-width: unquote("min(100%, 200px)");
+}

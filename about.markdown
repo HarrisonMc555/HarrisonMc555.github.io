@@ -4,6 +4,8 @@ title: About
 permalink: /about/
 ---
 
+<img src="{{ site.url }}/assets/img/harrison-mccullough-headshot.jpg" alt="Harrison McCullough Headshot" class="headshot"/>
+
 # {{ site.name }}
 
 I am passionate about all things software and software development. I also have a deep appreciation for and a good grasp

@@ -55,9 +55,9 @@ history. It is my preferred way to interactively explore programs in Python.
 You can install IPython by running the following command, assuming you have already installed Python and `pip` (the
 Python package manager):
 
-{% highlight bash %}
+```bash
 pip install ipython
-{% endhighlight %}
+```
 
 ## Conclusion
 

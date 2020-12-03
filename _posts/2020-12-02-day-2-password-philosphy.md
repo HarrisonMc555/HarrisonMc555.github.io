@@ -79,7 +79,7 @@ formatting and can be thrown away once we get the pieces we need.
 We want to create a regular expression pattern that matches this pattern and remembers the parts we care about. The
 pieces we care about need to be in groups (surrounded by parentheses) so we can extract them later. This is the pattern
 I came up with. If you're unfamiliar with regular expressions don't worry too much about it. They are a good tool,
-though, so I would recommend learning about them!
+though, so I would recommend learning about them at some point!
 
 ```text
 (\d+)-(\d+) ([a-z]): ([a-z]+)
@@ -110,12 +110,12 @@ group with the `.group()` method or get all of them with `.groups()`. Let's get 
 ('1', '3', 'a', 'abcde')
 ```
 
-Perfect! This has extracted each element we care about into separate elements of a tuple. The only thing we're missing
-now is that each element is still a string (`str`), but we want the first two elements to be numbers (`int`s). Let's
-unpack the tuple, parse the strings into numbers, and re-pack it into a tuple again.
+Perfect! This has extracted each element we care about into separate elements of a tuple. The only problem left is that
+each element is still a string (`str`), but we want the first two elements to be numbers (`int`s). Let's unpack the
+tuple, parse the strings into numbers, and re-pack it into a tuple again.
 
 > This could be a situation where we could use a class with named fields. However, since this is just a simple exercise
-> (and the tuple will only be just a few times) we'll just stick with an unnamed tuple.
+> (and the tuple will only be used a few times) we'll just stick with an unnamed tuple.
 
 ```python
 >>> count_min, count_max, letter, password = match.groups()
@@ -123,7 +123,7 @@ unpack the tuple, parse the strings into numbers, and re-pack it into a tuple ag
 (1, 3, 'a', 'abcde')
 ```
 
-You may look at the output here and say that we didn't change anything. However, if you look closely, the first two
+You may look at the output here and think that we didn't change anything. However, if you look closely, the first two
 elements in the tuple are no longer surrounded by single quotes (`'`). In the first example, they were strings
 (`str`s). In this example, they are `int`s. Keeping track of data types is very important when programming. Let's
 combine all of these pieces into a single `parse_line` function.
@@ -135,9 +135,9 @@ def parse_line(line):
     return int(count_min), int(count_max), letter, password
 ```
 
-You may have noticed that I put the pattern into global `LINE_RE` variable. Compiling a regular expression is a
-non-trivial operation, and you should always try to avoid doing that in a loop whenever possible. Since I need the same
-regular expression pattern for every line, it's better to compile it once and use it many times.
+Note that I put the pattern into global `LINE_RE` variable. Compiling a regular expression is a non-trivial operation,
+and you should avoid doing that in a loop whenever possible. Since we need the same regular expression pattern for every
+line, it's better to compile it once and use it many times.
 
 Now that we can parse each line into a tuple with the information we need, we need to determine if the password is valid
 or not. Let's review the rules for valid passwords.
@@ -146,8 +146,8 @@ or not. Let's review the rules for valid passwords.
 > valid.
 
 Our first goal is to determine how many times the given letter appears in the password. Fortunately for us, Python
-includes a `.count()` method on strings. In our example password, the given letter was `a` and the password was
-`'abcde'`. This password contains one `a`, so the return value should be `1`.
+includes a `.count()` method on strings (and lists). In our example password, the given letter was `a` and the password
+was `'abcde'`. This password contains one `a`, so the return value should be `1`.
 
 ```python
 >>> 'abcde'.count('a')
@@ -186,15 +186,15 @@ Let's test our function against the three test inputs.
 (2, 9, 'c', 'ccccccccc') True
 ```
 
-What just happened here? Let me break down a few pieces. First, created a list of the input lines for the
+What just happened here? Let me break down a few pieces. First, I created a list of the input lines for the
 examples. Then, I used a [list
 comprehension](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions) to transform each line into a
 tuple using the previously created `parse_line` function. Then, I used a `for` loop to iterate through the list of
 tuples. The strange `*tup` syntax is what the Python documentation refers to as [unpacking arguments
 lists](https://docs.python.org/3/tutorial/controlflow.html#unpacking-argument-lists). I've heard it referred to most
 often as the "splat" operator. It simply takes a tuple (or list or whatever) and uses each element as a different
-argument in the function you're calling. So, instead of calling `is_valid_password` with one argument, a tuple, we call
-it with four arguments, each element of the tuple. I used it here because I want the `is_valid_password` function to
+argument in the function you're calling. So, instead of calling `is_valid_password` with one argument (a tuple), we call
+it with four arguments (each element of the tuple). I used it here because I want the `is_valid_password` function to
 have reasonable parameter names, but I needed to return a tuple from the `parse_line` function so it could return more
 than one value.
 
@@ -228,7 +228,7 @@ def num_valid_passwords(input_file):
     return password_valids.count(True)
 ```
 
-This is a pretty common pattern I follow when writing code. Break pieces into bite-size chunks, then string them
+This is a pretty common pattern I follow when writing code. Break pieces into bite-size chunks, then combine them
 together with descriptive names in between.
 
 And now for the moment of truth:
@@ -240,3 +240,147 @@ And now for the moment of truth:
 
 If I plug that into [Advent of Code Day 2](adventofcode.com/2020/) it says I'm correct! Remember, however, that everyone
 has different inputs, so your answer will be different.
+
+
+## Part 2
+
+We have new password validation rules for part two of this exercise. Now, the numbers don't correspond to the minimum
+and maximum number of times a letter can appear, but, instead, correspond to indices in the password string. For the
+password to be valid, the given letter must appear at exactly one of those indices—but not both! Interesting.
+
+One thing to note is that almost the entire exercise is unchanged—reading the file, parsing the lines, etc. The only
+function we need to change is the `is_valid_password` function! What good fortune.
+
+Let's start by getting the letters at the given indices. I'm going to use the third example.
+
+```text
+>>> line = '2-9 c: ccccccccc'
+>>> index1, index2, letter, password = parse_line(line)
+>>> password[index1]
+'c'
+>>> password[index2]
+---------------------------------------------------------------------------
+IndexError                                Traceback (most recent call last)
+<ipython-input-39-7cfc02a6d36a> in <module>
+----> 1 password[index2]
+
+IndexError: string index out of range
+```
+
+What happened? Oh, right, this example uses one-based indices, but Python uses zero-based indices. Let's adjust.
+
+```text
+>>> line = '2-9 c: ccccccccc'
+>>> index1, index2, letter, password = parse_line(line)
+>>> password[index1 - 1]
+'c'
+>>> password[index2 - 1]
+'c'
+```
+
+Looks like it's working! Although it's hard to tell with a password of all `c`s. Let's try the second example.
+
+```text
+>>> line = '1-3 b: cdefg'
+>>> index1, index2, letter, password = parse_line(line)
+>>> password[index1 - 1]
+'c'
+>>> password[index2 - 1]
+'e'
+```
+
+Letters `c` and `e` are indeed at positions 1 and 3 (when using 1-based indexing). Great!
+
+Now we need to determine if **exactly one** of these letters matches the given letter. This is an operation known as
+"[exclusive or](https://en.wikipedia.org/wiki/Exclusive_or)". It is true when one _or_ the other is true, but _not_
+both. It is used extensively in computer hardware and low-level programming but is seen less often in high-level
+programming. However, there is an [exclusive or
+operator](https://docs.python.org/3/reference/expressions.html#binary-bitwise-operations), or "XOR" operator, in
+Python. Ostensibly, it can only be used on integers and performs a bitwise xor. However, Python lets us use it on
+`bool`s as well, and it does exactly what we'd expect it to.
+
+If you're still a little confused, here's how it works with every combination of two `bool`s.
+
+```python
+>>> True ^ True
+False
+>>> True ^ False
+True
+>>> False ^ True
+True
+>>> False ^ False
+False
+```
+
+There are ways we could do this without the XOR operator, but I think it's fun, so let's try it. First, we'll get the
+letters at each index (with one-based indices). Then, we'll see if each one matches the given letter. Then, we'll see if
+exactly **one** matches.
+
+```python
+def is_valid_password(index1, index2, letter, password):
+    letter1 = password[index1 - 1]
+    letter2 = password[index2 - 1]
+    letter1_matches = letter1 == letter
+    letter2_matches = letter2 == letter
+    return letter1_matches ^ letter2_matches
+```
+
+We could reduce this down to a much shorter function if we wanted to, but then we wouldn't have descriptive names and
+    would have to remember operator precedence (oh no!). For this post, we'll err on the side of readability. Anyways, let's
+try it on our example inputs.
+
+```python
+>>> lines = ['1-3 a: abcde', '1-3 b: cdefg', '2-9 c: ccccccccc']
+>>> tuples = [parse_line(line) for line in lines]
+>>> for tup in tuples:
+>>>     is_valid = is_valid_password(*tup)
+>>>     print(tup, is_valid)
+(1, 3, 'a', 'abcde') True
+(1, 3, 'b', 'cdefg') False
+(2, 9, 'c', 'ccccccccc') False
+```
+
+These results are different from part 1. Now, only the first example is valid. However, that is what we were expecting!
+I'll quote the Advent of Code description for an explanation.
+
+```text
+- 1-3 a: abcde is valid: position 1 contains a and position 3 does not.
+- 1-3 b: cdefg is invalid: neither position 1 nor position 3 contains b.
+- 2-9 c: ccccccccc is invalid: both position 2 and position 9 contain c.
+```
+
+I think we're ready to try this on our real input! Fortunately, every other function remains exactly the same. Now that
+we've changed our `is_valid_password` function, we can just call `num_valid_passwords` again.
+
+```python
+>>> num_valid_passwords('input.txt')
+482
+```
+
+Wow, that was really close to the last answer (`483`). But, as it turns out, this was correct (for my input). Hooray!
+
+
+## Conclusion
+
+I hope you found this insightful, educational, or entertaining (or all three). I'll see you next time for day 3!
+
+
+
+## Improving our solution
+
+There's not much we can do to make our solution significantly faster. However, there are a few things we could do to
+make our solution more resilient in case of exceptional circumstances. Here are a few things I can think of off the top
+of my head that we didn't worry about but could check for:
+
+  1. What if the file doesn't exist?
+  2. What if the line doesn't match the format we expect?
+  3. What if the numbers aren't actually numbers? E.g. `1-z a: abcde`.
+  4. What if the numbers are negative?
+  5. What if the numbers are greater than the length of the password?
+
+These are the kinds of questions you should ask when trying to write reliable code. In fact, in some languages, we would
+not have been able to write our code without considering what would happen in most of these situations.
+
+Handling all of these scenarios would make our code much more complex and distract from what I'm trying to
+illustrate. So, in these blog posts, I won't be worrying too much about these or similar scenarios. However, these are
+important considerations for any code that needs to be more reliable.

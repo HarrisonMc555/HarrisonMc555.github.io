@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "2020 Day 2: Password Philosophy"
-date: 2020-12-01 12:00:00 -0700
+date: 2020-12-02 12:00:00 -0700
 categories: coding adventofcode python
 ---
 
@@ -138,6 +138,9 @@ def parse_line(line):
 Note that I put the pattern into global `LINE_RE` variable. Compiling a regular expression is a non-trivial operation,
 and you should avoid doing that in a loop whenever possible. Since we need the same regular expression pattern for every
 line, it's better to compile it once and use it many times.
+
+
+### Validating the passwords
 
 Now that we can parse each line into a tuple with the information we need, we need to determine if the password is valid
 or not. Let's review the rules for valid passwords.

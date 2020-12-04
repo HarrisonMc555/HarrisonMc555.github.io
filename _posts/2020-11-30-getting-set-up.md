@@ -2,7 +2,7 @@
 layout: post
 title: "Getting Set Up"
 date: 2020-11-30 00:00:00 -0700
-categories: coding adventofcode python
+categories: adventofcode
 ---
 
 ## What is Advent of Code?
